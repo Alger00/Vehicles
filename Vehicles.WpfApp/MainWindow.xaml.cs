@@ -18,30 +18,66 @@ namespace Vehicles.WpfApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        private ObservableCollection<Vehicle> vehicles = new ObservableCollection<Vehicle>();
+        private ObservableCollection<Vehicle> cars = new ObservableCollection<Vehicle>();
+        private ObservableCollection<Vehicle> boats = new ObservableCollection<Vehicle>();
+        private Garage carGarage = new Garage("Car Garage");
+        private Garage boatGarage = new Garage("Boat Garage");
+        private Vehicle? selectedVehicle;
         public MainWindow()
         {
             InitializeComponent();
-            VehiclesListBox.ItemsSource = vehicles;
+            CarsListBox.ItemsSource = cars;
+            BoatsListBox.ItemsSource = boats;
         }
         private Vehicle? SelectedVehicle
         {
             get
             {
-                return VehiclesListBox.SelectedItem as Vehicle;
+                return selectedVehicle;
             }
         }
         private void AddCar_Click(object sender, RoutedEventArgs e)
         {
-            vehicles.Add(new Car("Volvo", "V60"));
+            foreach (Vehicle vehicle in carGarage.Vehicles)
+            {
+                LogListBox.Items.Add(vehicle.Honk());
+            }
+
+            Car car = new Car("Volvo", "V60");
+
+            carGarage.Vehicles.Add(car);
+            cars.Add(car);
         }
         private void AddBoat_Click(object sender, RoutedEventArgs e)
         {
-            vehicles.Add(new Boat("Bella", "600"));
+            foreach (Vehicle vehicle in boatGarage.Vehicles)
+            {
+                LogListBox.Items.Add(vehicle.Honk());
+            }
+
+            Boat boat = new Boat("Bella", "600");
+
+            boatGarage.Vehicles.Add(boat);
+            boats.Add(boat);
         }
         private void AddAmphi_Click(object sender, RoutedEventArgs e)
         {
-            vehicles.Add(new AmphibiousCar("Amphi", "X"));
+            foreach (Vehicle vehicle in carGarage.Vehicles)
+            {
+                LogListBox.Items.Add(vehicle.Honk());
+            }
+
+            foreach (Vehicle vehicle in boatGarage.Vehicles)
+            {
+                LogListBox.Items.Add(vehicle.Honk());
+            }
+
+            AmphibiousCar amphi = new AmphibiousCar("Amphi", "X");
+
+            carGarage.Vehicles.Add(amphi);
+            boatGarage.Vehicles.Add(amphi);
+            cars.Add(amphi);
+            boats.Add(amphi);
         }
         private void Drive_Click(object sender, RoutedEventArgs e)
         {
@@ -81,17 +117,69 @@ namespace Vehicles.WpfApp
         }
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
-            if (SelectedVehicle != null)
+            if (SelectedVehicle == null)
             {
-                vehicles.Remove(SelectedVehicle);
+                return;
+            }
+
+            bool inCarGarage = carGarage.Vehicles.Contains(SelectedVehicle);
+            bool inBoatGarage = boatGarage.Vehicles.Contains(SelectedVehicle);
+
+            carGarage.Vehicles.Remove(SelectedVehicle);
+            boatGarage.Vehicles.Remove(SelectedVehicle);
+
+            cars.Remove(SelectedVehicle);
+            boats.Remove(SelectedVehicle);
+
+            selectedVehicle = null;
+            CarsListBox.SelectedItem = null;
+            BoatsListBox.SelectedItem = null;
+
+            if (inCarGarage)
+            {
+                foreach (Vehicle vehicle in carGarage.Vehicles)
+                {
+                    LogListBox.Items.Add(vehicle.FlashLights());
+                }
+            }
+
+            if (inBoatGarage)
+            {
+                foreach (Vehicle vehicle in boatGarage.Vehicles)
+                {
+                    LogListBox.Items.Add(vehicle.FlashLights());
+                }
             }
         }
-        private void VehiclesListBox_SelectionChanged(object sender, RoutedEventArgs e)
+
+        private void CarsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (CarsListBox.SelectedItem != null)
+            {
+                BoatsListBox.SelectedItem = null;
+                selectedVehicle = CarsListBox.SelectedItem as Vehicle;
+            }
+
             DriveButton.IsEnabled = SelectedVehicle is IDriveable;
             SwimButton.IsEnabled = SelectedVehicle is ISwimmable;
+
             RefreshInfo();
         }
+
+        private void BoatsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (BoatsListBox.SelectedItem != null)
+            {
+                CarsListBox.SelectedItem = null;
+                selectedVehicle = BoatsListBox.SelectedItem as Vehicle;
+            }
+
+            DriveButton.IsEnabled = SelectedVehicle is IDriveable;
+            SwimButton.IsEnabled = SelectedVehicle is ISwimmable;
+
+            RefreshInfo();
+        }
+
         private void RefreshInfo()
         {
             if (SelectedVehicle == null)

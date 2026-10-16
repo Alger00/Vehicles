@@ -17,7 +17,7 @@ namespace Vehicles.Core
         }
         protected void ValidateDistance(double km)
         {
-            if (km < 0)
+            if (km <= 0)
             {
                 throw new ArgumentException("Distance must be greater than 0.");
             }
@@ -26,6 +26,14 @@ namespace Vehicles.Core
         public override string ToString()
         {
             return $"{Make} {Model}";
+        }
+        public virtual string Honk()
+        {
+            return $"{Make} {Model} honked.";
+        }
+        public virtual string FlashLights()
+        {
+            return $"{Make} {Model} flashed lights.";
         }
     }
 }
